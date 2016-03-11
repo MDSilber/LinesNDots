@@ -242,7 +242,8 @@
 
 - (void)replayButtonTapped
 {
-  _pauseButton.hidden = NO;
+  _playButton.hidden = NO;
+  _pauseButton.hidden = YES;
   _replayButton.hidden = YES;
   [_selectedPlayerPathLayer removeFromSuperlayer];
   _selectedPlayerPathPoints = @[];
