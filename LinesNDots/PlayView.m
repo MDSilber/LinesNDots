@@ -63,21 +63,23 @@
     _playButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
     _playButton.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     [_playButton addTarget:self action:@selector(_playButtonTapped) forControlEvents:UIControlEventTouchUpInside];
-    [_dimView addSubview:_playButton];
+    [[[UIApplication sharedApplication].windows lastObject] addSubview:_playButton];
 
     _pauseButton = [UIButton buttonWithType:UIButtonTypeCustom];
     _pauseButton.frame = CGRectMake(0, 0, 84, 84);
     [_pauseButton setImage:[UIImage imageNamed:@"pause_button"] forState:UIControlStateNormal];
     [_pauseButton addTarget:self action:@selector(pauseButtonTapped) forControlEvents:UIControlEventTouchUpInside];
     _pauseButton.hidden = YES;
-    [self addSubview:_pauseButton];
+    [[[UIApplication sharedApplication].windows lastObject] addSubview:_pauseButton];
 
     _replayButton = [UIButton buttonWithType:UIButtonTypeCustom];
     _replayButton.frame = CGRectMake(0, 0, 84, 84);
     [_replayButton setImage:[UIImage imageNamed:@"replay_button"] forState:UIControlStateNormal];
     [_replayButton addTarget:self action:@selector(replayButtonTapped) forControlEvents:UIControlEventTouchUpInside];
     _replayButton.hidden = YES;
-    [self addSubview:_replayButton];
+    [[[UIApplication sharedApplication].windows lastObject] addSubview:_replayButton];
+
+
   }
 
   return self;
@@ -87,9 +89,14 @@
 {
   [super layoutSubviews];
   _dimView.frame = CGRectMake(0, 0, CGRectGetWidth(self.bounds), self.contentSize.height);
-  _playButton.frame = CGRectMake(8.0, CGRectGetHeight(self.bounds) - 92 + self.contentOffset.y, 84, 84);
-  _pauseButton.frame = CGRectMake(8.0, CGRectGetHeight(self.bounds) - 92 + self.contentOffset.y, 84, 84);
-  _replayButton.frame = CGRectMake(8.0, CGRectGetHeight(self.bounds) - 92 + self.contentOffset.y, 84, 84);
+
+  _playButton.frame = CGRectMake(8.0, CGRectGetHeight(self.bounds) - 92, 84, 84);
+  _pauseButton.frame = CGRectMake(8.0, CGRectGetHeight(self.bounds) - 92, 84, 84);
+  _replayButton.frame = CGRectMake(8.0, CGRectGetHeight(self.bounds) - 92, 84, 84);
+
+  [[[UIApplication sharedApplication].windows lastObject] bringSubviewToFront:_playButton];
+  [[[UIApplication sharedApplication].windows lastObject] bringSubviewToFront:_pauseButton];
+  [[[UIApplication sharedApplication].windows lastObject] bringSubviewToFront:_replayButton];
 }
 
 - (void)setCurrentPlay:(Play *)currentPlay
@@ -130,14 +137,6 @@
       [_playerViews setObject:playerView forKey:player.playerID];
     }
 
-    CGFloat offsetY = [self convertFieldPositionToCoordinateInScrollView:CGPointMake(centerFrame.position.x, centerFrame.position.y)].y - floorf(2 * CGRectGetHeight(self.frame) / 3);
-    if (offsetY < 0) {
-      offsetY = 0;
-    } else if (offsetY > self.contentSize.height) {
-      offsetY = self.contentSize.height - CGRectGetHeight(self.frame);
-    }
-    self.contentOffset = CGPointMake(0, offsetY);
-
     [self setNeedsLayout];
     [self _resetState];
   }
@@ -148,6 +147,7 @@
   if (![_currentFrame isEqual:currentFrame]) {
     _currentFrame = currentFrame;
 
+    CGPoint ballPosition = self.center;
     for (PlayerFrame *playerFrame in currentFrame.playerFrames) {
       Player *player = playerFrame.player;
       PlayerView *playerView = [_playerViews objectForKey:player.playerID];
@@ -166,12 +166,23 @@
 
       CGPoint newPlayerViewPosition = [self convertFieldPositionToCoordinateInScrollView:CGPointMake(playerFrame.position.x, playerFrame.position.y)];
       playerView.center = newPlayerViewPosition;
+      if (playerView.hasBall) {
+        ballPosition = playerView.center;
+      }
 
       if ([player isEqual:_selectedPlayerView.player]) {
         _selectedPlayerPathPoints = [_selectedPlayerPathPoints arrayByAddingObject:[NSValue valueWithCGPoint:newPlayerViewPosition]];
         [self setNeedsDisplay];
       }
     }
+
+    CGFloat offsetY = ballPosition.y - floorf(CGRectGetHeight(self.frame) / 2);
+    if (offsetY < 0) {
+      offsetY = 0;
+    } else if (offsetY > self.contentSize.height) {
+      offsetY = self.contentSize.height - CGRectGetHeight(self.frame);
+    }
+    self.contentOffset = CGPointMake(0, offsetY);
 
     if ([[_currentPlay frames] lastObject] == currentFrame) {
       _pauseButton.hidden = YES;
