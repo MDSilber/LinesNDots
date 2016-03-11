@@ -26,6 +26,8 @@
   UIButton *_pauseButton;
   UIButton *_replayButton;
   UIButton *_playButton;
+  NSArray<NSValue *> *_selectedPlayerPathPoints;
+  CAShapeLayer *_selectedPlayerPathLayer;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -35,6 +37,12 @@
   if (self) {
     _playerViews = [NSMutableDictionary new];
     _fieldImage = [UIImage imageNamed:@"football_field"];
+    _selectedPlayerPathPoints = @[];
+
+    _selectedPlayerPathLayer = [[CAShapeLayer alloc] init];
+    _selectedPlayerPathLayer.lineWidth = 6.0;
+    _selectedPlayerPathLayer.strokeColor = [UIColor whiteColor].CGColor;
+    _selectedPlayerPathLayer.fillColor = [UIColor clearColor].CGColor;
 
     _fieldView = [[UIImageView alloc] initWithImage:_fieldImage];
     [self addSubview:_fieldView];
@@ -94,6 +102,8 @@
       [playerView removeFromSuperview];
     }
     [_playerViews removeAllObjects];
+    _selectedPlayerPathPoints = @[];
+    [_selectedPlayerPathLayer removeFromSuperlayer];
 
     PlayFrame *firstFrame = [currentPlay.frames firstObject];
     PlayerFrame *centerFrame = [firstFrame.playerFrames firstObject];
@@ -113,6 +123,7 @@
 
       playerView.delegate = self;
       playerView.center = [self convertFieldPositionToCoordinateInScrollView:CGPointMake(playerFrame.position.x, playerFrame.position.y)];
+
       [self addSubview:playerView];
 
       [_playerViews setObject:playerView forKey:player.playerID];
@@ -131,6 +142,25 @@
   }
 }
 
+- (void)drawRect:(CGRect)rect
+{
+  [super drawRect:rect];
+
+  if ([_selectedPlayerPathPoints count] > 2) {
+    UIBezierPath *path = [UIBezierPath bezierPath];
+    [path moveToPoint:[[_selectedPlayerPathPoints firstObject] CGPointValue]];
+
+    for (NSValue *point in [_selectedPlayerPathPoints subarrayWithRange:NSMakeRange(1, [_selectedPlayerPathPoints count] - 2)]) {
+      [path addLineToPoint:[point CGPointValue]];
+    }
+
+    [_selectedPlayerPathLayer setPath:path.CGPath];
+    [self.layer addSublayer:_selectedPlayerPathLayer];
+  } else {
+    [_selectedPlayerPathLayer removeFromSuperlayer];
+  }
+}
+
 - (void)setCurrentFrame:(PlayFrame *)currentFrame
 {
   if (![_currentFrame isEqual:currentFrame]) {
@@ -143,7 +173,6 @@
       [playerView setTimeToQuarterback:playerFrame.distanceToQB];
 
       if ([playerFrame closestPlayerID]) {
-
         Player *closestPlayer = [[PlayerRoster sharedRoster] playerForPlayerID:[playerFrame closestPlayerID] team:player.playerTeam];
         NSArray *linePositions = @[@"DT", @"DE", @"OC", @"OG", @"OT"];
 
@@ -152,7 +181,14 @@
           [playerView setClosestPlayerCoordinate:closestPlayerView.center];
         }
       }
-      playerView.center = [self convertFieldPositionToCoordinateInScrollView:CGPointMake(playerFrame.position.x, playerFrame.position.y)];
+
+      CGPoint newPlayerViewPosition = [self convertFieldPositionToCoordinateInScrollView:CGPointMake(playerFrame.position.x, playerFrame.position.y)];
+      playerView.center = newPlayerViewPosition;
+
+      if ([player isEqual:_selectedPlayerView.player]) {
+        _selectedPlayerPathPoints = [_selectedPlayerPathPoints arrayByAddingObject:[NSValue valueWithCGPoint:newPlayerViewPosition]];
+        [self setNeedsDisplay];
+      }
     }
 
     if ([[_currentPlay frames] lastObject] == currentFrame) {
@@ -186,6 +222,9 @@
     _selectedPlayerView.selected = NO;
     playerView.selected = YES;
     _selectedPlayerView = playerView;
+
+    [_selectedPlayerPathLayer removeFromSuperlayer];
+    _selectedPlayerPathPoints = @[];
   } else {
     [self.playViewDelegate playerDeselected:playerView.player];
 
@@ -205,6 +244,9 @@
 {
   _pauseButton.hidden = NO;
   _replayButton.hidden = YES;
+  [_selectedPlayerPathLayer removeFromSuperlayer];
+  _selectedPlayerPathPoints = @[];
+
   [self.playViewDelegate replayButtonTapped];
 }
 
@@ -216,10 +258,5 @@
 {
   return CGPointMake(14 + floorf(740 * fieldPosition.x / 160), 16 + floorf(1760 * (fieldPosition.y + 30) / 360));
 }
-
-//- (CGPoint)convertCoordinateInScrollViewToCoordinateOnScreen:(CGPoint)scrollViewCoordinate
-//{
-//  return CGPointMake(scrollViewCoordinate.x, scrollViewCoordinate.y - self.contentOffset.y);
-//}
 
 @end
