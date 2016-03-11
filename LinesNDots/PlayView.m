@@ -102,6 +102,7 @@
       [playerView removeFromSuperview];
     }
     [_playerViews removeAllObjects];
+    _selectedPlayerView = nil;
     _selectedPlayerPathPoints = @[];
     [_selectedPlayerPathLayer removeFromSuperlayer];
 
@@ -142,25 +143,6 @@
   }
 }
 
-- (void)drawRect:(CGRect)rect
-{
-  [super drawRect:rect];
-
-  if ([_selectedPlayerPathPoints count] > 2) {
-    UIBezierPath *path = [UIBezierPath bezierPath];
-    [path moveToPoint:[[_selectedPlayerPathPoints firstObject] CGPointValue]];
-
-    for (NSValue *point in [_selectedPlayerPathPoints subarrayWithRange:NSMakeRange(1, [_selectedPlayerPathPoints count] - 2)]) {
-      [path addLineToPoint:[point CGPointValue]];
-    }
-
-    [_selectedPlayerPathLayer setPath:path.CGPath];
-    [self.layer addSublayer:_selectedPlayerPathLayer];
-  } else {
-    [_selectedPlayerPathLayer removeFromSuperlayer];
-  }
-}
-
 - (void)setCurrentFrame:(PlayFrame *)currentFrame
 {
   if (![_currentFrame isEqual:currentFrame]) {
@@ -196,6 +178,25 @@
       _playButton.hidden = YES;
       _replayButton.hidden = NO;
     }
+  }
+}
+
+- (void)drawRect:(CGRect)rect
+{
+  [super drawRect:rect];
+
+  if ([_selectedPlayerPathPoints count] > 2) {
+    UIBezierPath *path = [UIBezierPath bezierPath];
+    [path moveToPoint:[[_selectedPlayerPathPoints firstObject] CGPointValue]];
+
+    for (NSValue *point in [_selectedPlayerPathPoints subarrayWithRange:NSMakeRange(1, [_selectedPlayerPathPoints count] - 2)]) {
+      [path addLineToPoint:[point CGPointValue]];
+    }
+
+    [_selectedPlayerPathLayer setPath:path.CGPath];
+    [self.layer addSublayer:_selectedPlayerPathLayer];
+  } else {
+    [_selectedPlayerPathLayer removeFromSuperlayer];
   }
 }
 
