@@ -132,7 +132,8 @@
     [self.scoreboardView setCurrentPlay:selectedPlay];
     self.scoreboardView.currentFrame = [selectedPlay.frames firstObject];
     [self.playView setCurrentPlay:selectedPlay];
-    _canceled = YES;
+    [self.playView setCurrentFrame:[[selectedPlay frames] firstObject]];
+    _currentFrameIndex = 0;
 
     self.selectedCell.selected = NO;
     self.selectedCell = (PlayCell *)[collectionView cellForItemAtIndexPath:indexPath];
@@ -145,11 +146,10 @@
 - (void)playButtonTapped
 {
   _pause = NO;
-  _canceled = NO;
   if (_currentFrameIndex) {
-    [self animatePlayForIndex:_currentFrameIndex];
+    [self animatePlay:self.playView.currentPlay forIndex:_currentFrameIndex];
   } else {
-    [self animatePlayForIndex:0];
+    [self animatePlay:self.playView.currentPlay forIndex:0];
   }
 }
 
@@ -160,15 +160,16 @@
 
 - (void)replayButtonTapped
 {
-  [self animatePlayForIndex:0];
+  _currentFrameIndex = 0;
+  _pause = NO;
+
+  [self.playView setCurrentFrame:[[self.playView.currentPlay frames] firstObject]];
 }
 
-- (void)animatePlayForIndex:(NSInteger)i
+- (void)animatePlay:(Play *)play forIndex:(NSInteger)i
 {
-  if (_pause || _canceled) {
-    if (!_canceled) {
-      _currentFrameIndex = i;
-    }
+  if (_pause) {
+    _currentFrameIndex = i;
     return;
   }
   NSArray *frames = [self.playView currentPlay].frames;
@@ -184,7 +185,9 @@
                      [self.scoreboardView setCurrentFrame:frames[i]];
                    }
                    completion:^(BOOL finished) {
-                     [self animatePlayForIndex:i+1];
+                     if (play == [self.playView currentPlay]) {
+                       [self animatePlay:play forIndex:i+1];
+                     }
                    }];
 }
 
