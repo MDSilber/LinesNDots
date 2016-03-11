@@ -28,7 +28,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		7D9FA2C51C8E2DD800EB6E56 /* LinesNDots.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LinesNDots.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7D9FA2C51C8E2DD800EB6E56 /* Clipboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Clipboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7D9FA2C91C8E2DD800EB6E56 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		7D9FA2CB1C8E2DD800EB6E56 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		7D9FA2CC1C8E2DD800EB6E56 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -86,7 +86,7 @@
 		7D9FA2C61C8E2DD800EB6E56 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7D9FA2C51C8E2DD800EB6E56 /* LinesNDots.app */,
+				7D9FA2C51C8E2DD800EB6E56 /* Clipboard.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -161,7 +161,7 @@
 			);
 			name = LinesNDots;
 			productName = LinesNDots;
-			productReference = 7D9FA2C51C8E2DD800EB6E56 /* LinesNDots.app */;
+			productReference = 7D9FA2C51C8E2DD800EB6E56 /* Clipboard.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -326,7 +326,7 @@
 				INFOPLIST_FILE = LinesNDots/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.maxsegan.LinesNDots;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Clipboard;
 				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
@@ -340,7 +340,7 @@
 				INFOPLIST_FILE = LinesNDots/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.maxsegan.LinesNDots;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Clipboard;
 				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
